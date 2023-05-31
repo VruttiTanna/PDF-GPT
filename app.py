@@ -17,8 +17,7 @@ from PIL import Image
 COUNT, N = 0, 0
 chat_history = []
 chain = ''
-enable_box = gr.Textbox.update(value=None, 
-                          placeholder='Upload your OpenAI API key', interactive=True)
+enable_box = gr.Textbox.update(value=None, placeholder='Upload your OpenAI API key', interactive=True)
 disable_box = gr.Textbox.update(value='OpenAI API key is Set', interactive=False)
 
 # Function to set the OpenAI API key
@@ -49,9 +48,7 @@ def process_file(file):
     
     pdfsearch = Chroma.from_documents(documents, embeddings)
 
-    chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3), 
-                                   retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
-                                   return_source_documents=True)
+    chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3), retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}), return_source_documents=True)
     return chain
 
 # Function to generate a response based on the chat history and query
@@ -89,11 +86,7 @@ with gr.Blocks() as demo:
     with gr.Column():
         with gr.Row():
             with gr.Column(scale=0.8):
-                api_key = gr.Textbox(
-                    placeholder='Enter OpenAI API key',
-                    show_label=False,
-                    interactive=True
-                ).style(container=False)
+                api_key = gr.Textbox(placeholder='Enter OpenAI API key', show_label=False, interactive=True).style(container=False)
             with gr.Column(scale=0.2):
                 change_api_key = gr.Button('Change Key')
 
@@ -103,10 +96,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column(scale=0.70):
-            txt = gr.Textbox(
-                show_label=False,
-                placeholder="Enter text and press enter"
-            ).style(container=False)
+            txt = gr.Textbox(show_label=False,placeholder="Enter text and press enter").style(container=False)
 
         with gr.Column(scale=0.15):
             submit_btn = gr.Button('Submit')
@@ -126,20 +116,7 @@ with gr.Blocks() as demo:
     btn.upload(fn=render_first, inputs=[btn], outputs=[show_img])
 
     # Event handler for submitting text and generating response
-    submit_btn.click(
-        fn=add_text,
-        inputs=[chatbot, txt],
-        outputs=[chatbot],
-        queue=False
-    ).success(
-        fn=generate_response,
-        inputs=[chatbot, txt, btn],
-        outputs=[chatbot, txt]
-    ).success(
-        fn=render_file,
-        inputs=[btn],
-        outputs=[show_img]
-    )
+    submit_btn.click(fn=add_text,inputs=[chatbot, txt],outputs=[chatbot],queue=False).success(fn=generate_response,inputs=[chatbot, txt, btn],outputs=[chatbot, txt]).success(fn=render_file,inputs=[btn],outputs=[show_img])
 demo.queue()
 if __name__ == "__main__":
     demo.launch()
