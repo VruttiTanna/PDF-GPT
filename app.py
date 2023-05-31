@@ -81,40 +81,42 @@ def render_file(file):
     return image
 
 # Gradio application setup
-demo = gr.Interface(
-    inputs=[gr.Textbox(placeholder='Enter text and press enter')],
-    outputs=[gr.Textbox(label='Chatbot', disabled=True), gr.Textbox(label='Query', disabled=True)],
-    title='PDF Chatbot',
-    layout='vertical',
-    theme='default'
-)
+with gr.Blocks() as demo:
 
-# Set the OpenAI API key and handle interactions
-def set_api_key(api_key):
-    os.environ['OPENAI_API_KEY'] = api_key
-    return "OpenAI API key is set."
+    # Chatbot and image display sections
+    with gr.Column():
+        with gr.Row():
+            with gr.Column(scale=0.8):
+                api_key = gr.Textbox(placeholder='Enter OpenAI API key', show_label=False, interactive=True).style(container=False)
+            with gr.Column(scale=0.2):
+                change_api_key = gr.Button('Change Key')
+        with gr.Row():
+            chatbot = gr.Chatbot(value=[], elem_id='chatbot').style(height=650)
+            show_img = gr.Image(label='Upload PDF', tool='select').style(height=680)
+    
+    # Text input and PDF upload sections
+    with gr.Row():
+        with gr.Column(scale=0.70):
+            txt = gr.Textbox(
+                show_label=False,
+                placeholder="Enter text and press enter",
+            ).style(container=False)
+        with gr.Column(scale=0.15):
+            submit_btn = gr.Button('Submit')
+        with gr.Column(scale=0.15):
+            btn = gr.UploadButton("📁 Upload a PDF", file_types=[".pdf"]).style()
+    
+    # Set the OpenAI API key and handle interactions
+    api_key.submit(fn=set_apikey, inputs=[api_key], outputs=[api_key])
+    change_api_key.click(fn=enable_api_box, outputs=[api_key])
+    btn.upload(fn=render_file, inputs=[btn], outputs=[show_img])
+    
+    # Perform actions on text input and PDF upload
+    submit_btn.click(fn=add_text, inputs=[chatbot, txt], outputs=[chatbot, ], queue=False).success(fn=generate_response,
+                                  inputs=[chatbot, txt, btn],
+                                  outputs=[chatbot, txt]).success(fn=render_file,
+                                  inputs=[btn], outputs=[show_img])
 
-demo.add_textbox('Enter OpenAI API key:', type='password', command=set_api_key)
-
-# Perform actions on text input and PDF upload
-def process_text(text):
-    chat_history.append(text)
-    query = chat_history[-1]
-    result = chain({"question": query, 'chat_history': chat_history}, return_only_outputs=True)
-    chat_history.append(result['answer'])
-    return chat_history[-2:]
-
-demo.add_textbox('Enter text:', command=process_text)
-
-# PDF upload
-def process_pdf(file):
-    global chain, COUNT
-    if COUNT == 0:
-        chain = process_file(file)
-        COUNT += 1
-    return 'PDF uploaded.'
-
-demo.add_file_handler('Upload PDF:', process_pdf)
-
-# Launch the Gradio interface
-demo.launch()
+demo.queue()
+if __name__ == "__main__":
+    demo.launch()
