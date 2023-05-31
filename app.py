@@ -112,7 +112,7 @@ with gr.Blocks() as demo:
     btn.upload(fn=render_file, inputs=[btn], outputs=[show_img])
     
     # Perform actions on text input and PDF upload
-    submit_btn.click(fn=add_text, inputs=[chatbot, txt], outputs=[chatbot], queue=False).success(fn=generate_response,
+    submit_btn.click(fn=add_text, inputs=[chatbot, txt], outputs=[chatbot]).success(fn=generate_response,
                                   inputs=[chatbot, txt, btn],
                                   outputs=[chatbot, txt]).success(fn=render_file,
                                   inputs=[btn], outputs=[show_img])
