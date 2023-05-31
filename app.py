@@ -81,7 +81,7 @@ def render_file(file):
     return image
 
 # Gradio application setup
-with gr.Blocks() as demo:
+with gr.Interface() as demo:
 
     # Chatbot and image display sections
     with gr.Column():
@@ -117,6 +117,4 @@ with gr.Blocks() as demo:
                                   outputs=[chatbot, txt]).success(fn=render_file,
                                   inputs=[btn], outputs=[show_img])
 
-demo.queue()
-if __name__ == "__main__":
-    demo.launch()
+demo.launch()
