@@ -109,7 +109,7 @@ with gr.Blocks() as demo:
     # Set the OpenAI API key and handle interactions
     api_key.submit(fn=set_apikey, inputs=[api_key], outputs=[api_key])
     change_api_key.click(fn=enable_api_box, outputs=[api_key])
-    btn.upload(fn=render_first, inputs=[btn], outputs=[show_img])
+    btn.upload(fn=render_file, inputs=[btn], outputs=[show_img])
     
     # Perform actions on text input and PDF upload
     submit_btn.click(fn=add_text, inputs=[chatbot, txt], outputs=[chatbot, ], queue=False).success(fn=generate_response,
