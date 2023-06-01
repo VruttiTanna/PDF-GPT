@@ -6,6 +6,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
+import PyPDF2
 
 
 # Function to set the OpenAI API key
@@ -91,3 +92,10 @@ if submit_btn:
             st.error('The uploaded PDF does not contain any searchable content.')
 
         os.remove(temp_path)
+        
+        # Display PDF as image
+        pdf_file = open(temp_path, 'rb')
+        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+        first_page = pdf_reader.getPage(0)
+        pdf_image = first_page.extractText()  # Extract the image from the first page
+        st.image(pdf_image)
