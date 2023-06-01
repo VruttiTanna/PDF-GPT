@@ -1,12 +1,17 @@
 import streamlit as st
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import PyPDFLoader
+import os
 import fitz
 from PIL import Image
-import os
 
 # Global variables
 COUNT, N = 0, 0
 chat_history = []
-chain = ''
+chain = None
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
@@ -51,9 +56,10 @@ def generate_response(history, query, btn):
     chat_history.append((query, result["answer"]))
     N = list(result['source_documents'][0])[1][1]['page']
 
+    response = ""
     for char in result['answer']:
-        history[-1] = (history[-1][0], history[-1][1] + char)
-        yield history, ''
+        response += char
+        yield (history, response)
 
 # Function to render a specific page of a PDF file as an image
 def render_file(file):
@@ -91,5 +97,8 @@ submit_btn = st.button('Submit')
 
 if submit_btn:
     add_text(chat_history, txt)
-    generate_response(chat_history, txt, btn)
-    render_file(btn)
+    response_generator = generate_response(chat_history, txt, btn)
+    for history, response in response_generator:
+        chat_history_output.text('\n'.join([f'{h[0]}: {h[1]}' for h in history]))
+        chat_history_output.text(response)
+        render_file(btn)
