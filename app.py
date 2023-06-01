@@ -75,7 +75,7 @@ if submit_btn:
         chain = process_file(temp_path)
 
         # Generate response only based on the content mentioned in the document
-        if chain.llm.retriever.retriever.vectorstore.data:
+        if chain.llm.retriever.vectorstore.data:
             result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
             chat_history.append((txt, result["answer"]))
             chat_history_output.write(chat_history[-1][1])
