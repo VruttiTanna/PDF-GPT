@@ -4,7 +4,6 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import PyPDFLoader
 import os
 import fitz
 from PIL import Image
@@ -31,8 +30,8 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file.name)
-    documents = loader.load()
+    doc = fitz.open(stream=file.read(), filetype="pdf")
+    documents = [doc]
 
     embeddings = OpenAIEmbeddings()
     pdfsearch = Chroma.from_documents(documents, embeddings)
@@ -64,12 +63,11 @@ def generate_response(history, query, btn):
 def render_file(btn):
     global N
     try:
-        pdf_bytes = BytesIO(btn.read())
-        with fitz.open("pdf", pdf_bytes) as doc:
-            page = doc[N]
-            # Render the page as a PNG image with a resolution of 300 DPI
-            pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
-            image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
+        doc = fitz.open(stream=btn.read(), filetype="pdf")
+        page = doc[N]
+        # Render the page as a PNG image with a resolution of 300 DPI
+        pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
+        image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
     except FileNotFoundError:
         raise st.Error('PDF file not found. Please make sure the file exists and check the file path.')
