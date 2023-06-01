@@ -10,3 +10,4 @@ pillow
 PyPDF2
 pdf2image
 wand
+poppler-utils
