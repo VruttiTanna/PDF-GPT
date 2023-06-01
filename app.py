@@ -6,6 +6,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
+import tempfile
 
 
 # Function to set the OpenAI API key
@@ -67,8 +68,14 @@ if submit_btn:
     if not btn:
         st.error('Upload a PDF file')
     else:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(btn.read())
+
         add_text(chat_history, txt)
-        chain = process_file(btn)
+        chain = process_file(temp_path)
         result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
         chat_history.append((txt, result["answer"]))
         chat_history_output.write(chat_history[-1][1])
+
+        os.remove(temp_path)
