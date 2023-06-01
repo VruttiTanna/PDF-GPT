@@ -84,6 +84,10 @@ def generate_response(history, query, btn):
 def render_file(btn):
     global N
     try:
+        # Check if the file is empty
+        if btn.size == 0:
+            raise st.error('Uploaded PDF file is empty')
+
         doc = fitz.open(stream=btn.read(), filetype="pdf")
         page = doc[N]
         # Render the page as a PNG image with a resolution of 300 DPI
