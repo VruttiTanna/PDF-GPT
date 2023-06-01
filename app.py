@@ -92,8 +92,3 @@ if submit_btn:
     add_text(chat_history, txt)
     generate_response(chat_history, txt, btn)
     render_file(btn)
-
-
-if __name__ == "__main__":
-    st.set_page_config(layout="wide")
-   
