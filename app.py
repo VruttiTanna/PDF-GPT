@@ -53,7 +53,7 @@ if api_key:
     set_apikey(api_key)
 
 # Main Section - Chatbot and PDF Upload
-col1, col2 = st.beta_columns([2, 1])
+col1, col2, col3 = st.beta_columns([2, 1, 1])
 
 # Chatbot Section
 with col1:
@@ -100,9 +100,12 @@ with col2:
             temp_file.write(uploaded_file.read())
 
         st.success('PDF uploaded successfully!')
-
-        # Display uploaded PDF
-        st.subheader('Uploaded PDF')
+        st.subheader('Uploaded PDF Preview')
         st.write(uploaded_file)
 
-st.beta_columns([2, 1])  # Add space between sections
+# Clear Chat History Section
+with col3:
+    if st.button('Clear Chat History'):
+        chat_history = []
+
+st
