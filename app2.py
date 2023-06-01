@@ -70,12 +70,12 @@ with col1:
 
             # PDF Upload Section
             st.subheader('Upload PDF')
-            btn = st.file_uploader('Upload a PDF', type=".pdf")
+            uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
 
-            if btn:
+            if uploaded_file:
                 with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                     temp_path = temp_file.name
-                    temp_file.write(btn.read())
+                    temp_file.write(uploaded_file.read())
 
                 chain = process_file(temp_path)
 
@@ -100,6 +100,6 @@ with col1:
 
 # Image Display Section
 with col2:
-    if btn:
+    if uploaded_file:
         st.subheader('Uploaded PDF Preview')
-        st.image(btn, caption='Uploaded PDF', use_column_width=True)
+        st.image(uploaded_file, caption='Uploaded PDF', use_column_width=True)
