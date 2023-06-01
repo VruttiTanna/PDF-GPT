@@ -74,8 +74,18 @@ if submit_btn:
         add_text(chat_history, txt)
         chain = process_file(temp_path)
 
-        if chain.retriever.vectorstore.data:
-            result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
+        # Set context and prompt template
+        context = " ".join([item[0] for item in chat_history])
+        prompt_template = "The document mentions {}. What would you like to know about it?"
+
+        if chain.retriever.vectorstore:
+            result = chain({
+                "question": txt,
+                'chat_history': chat_history,
+                'context': context,
+                'prompt_template': prompt_template
+            }, return_only_outputs=True)
+
             chat_history.append((txt, result["answer"]))
             chat_history_output.write(chat_history[-1][1])
         else:
