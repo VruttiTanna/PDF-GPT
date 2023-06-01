@@ -98,9 +98,7 @@ with col2:
     btn = st.file_uploader('Upload a PDF', type=".pdf")
     show_img = st.empty()
 
-submit_btn = st
-
-.button('Submit')
+submit_btn = st.button('Submit')
 
 if submit_btn:
     add_text(chat_history, txt)
