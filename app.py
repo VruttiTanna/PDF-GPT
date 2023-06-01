@@ -26,6 +26,8 @@ def add_text(history, text):
     return history
 
 # Function to process the PDF file and create a conversation chain
+from langchain.retrievers import TextRetriever
+
 def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
@@ -35,10 +37,13 @@ def process_file(file):
 
     embeddings = OpenAIEmbeddings()
 
+    retriever = TextRetriever(documents, embeddings)
+
     chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
-                                                  retriever=documents,
+                                                  retriever=retriever,
                                                   return_source_documents=True)
     return chain
+
 
 
 
