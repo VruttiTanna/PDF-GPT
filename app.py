@@ -108,4 +108,4 @@ with col3:
     if st.button('Clear Chat History'):
         chat_history = []
 
-st
+st.sidebar.info('To use the chatbot, enter your OpenAI API key in the sidebar.')
