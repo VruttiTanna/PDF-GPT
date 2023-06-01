@@ -1,5 +1,5 @@
 import streamlit as st
-from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfReader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
@@ -95,10 +95,16 @@ with col2:
             st.session_state.temp_path = temp_file.name
             temp_file.write(uploaded_file.read())
 
+        st.success('PDF uploaded successfully!')
+
+# PDF Preview Section
+with col3:
     if 'temp_path' in st.session_state:
-        # Extract first page of PDF as preview image
-        pdf_reader = PdfFileReader(st.session_state.temp_path)
-        page = pdf_reader.getPage(0)
-        preview_image = page.extract_images()[0]
+        st.subheader('Uploaded PDF Preview')
+
+        # Replace this logic with your PDF preview extraction code
+        pdf_reader = PdfReader(st.session_state.temp_path)
+        first_page = pdf_reader.pages[0]
+        preview_image = first_page.extract_text()
 
         st.image(preview_image, caption='Uploaded PDF Preview', use_column_width=True)
