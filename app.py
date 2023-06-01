@@ -1,11 +1,9 @@
+I apologize for the confusion. Upon reviewing the code again, I noticed that the `file_uploader` from Streamlit returns a `BytesIO` object instead of a file name. Therefore, we need to modify the code to handle the `BytesIO` object appropriately.
+
+Here's an updated version of the code that should work:
+
+```python
 import streamlit as st
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Chroma
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import PyPDFLoader
-import os
 import fitz
 from PIL import Image
 
@@ -30,15 +28,17 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file.name)
+    loader = PyPDFLoader(file)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
     pdfsearch = Chroma.from_documents(documents, embeddings)
 
-    chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
-                                                  retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
-                                                  return_source_documents=True)
+    chain = ConversationalRetrievalChain.from_llm(
+        ChatOpenAI(temperature=0.3),
+        retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
+        return_source_documents=True
+    )
     return chain
 
 # Function to generate a response based on the chat history and query
@@ -63,7 +63,7 @@ def generate_response(history, query, btn):
 def render_file(file):
     global N
     try:
-        doc = fitz.open(file)
+        doc = fitz.open(stream=file.getvalue(), filetype="pdf")
         page = doc[N]
         # Render the page as a PNG image with a resolution of 300 DPI
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
@@ -71,7 +71,6 @@ def render_file(file):
         return image
     except FileNotFoundError:
         st.error('PDF file not found. Please make sure the file exists and check the file path.')
-
 
 # Streamlit application setup
 st.title('Chatbot with PDF Support')
@@ -98,3 +97,8 @@ if submit_btn:
     add_text(chat_history, txt)
     generate_response(chat_history, txt, btn)
     render_file(btn)
+
+
+if __name__ == "__main__":
+    st.set_page_config(layout="wide")
+   
