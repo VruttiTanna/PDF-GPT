@@ -1,6 +1,5 @@
 import streamlit as st
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
@@ -74,8 +73,13 @@ if submit_btn:
 
         add_text(chat_history, txt)
         chain = process_file(temp_path)
-        result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
-        chat_history.append((txt, result["answer"]))
-        chat_history_output.write(chat_history[-1][1])
+
+        # Generate response only based on the content mentioned in the document
+        if chain.documents:
+            result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
+            chat_history.append((txt, result["answer"]))
+            chat_history_output.write(chat_history[-1][1])
+        else:
+            st.error('The uploaded PDF does not contain any searchable content.')
 
         os.remove(temp_path)
