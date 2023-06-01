@@ -7,4 +7,3 @@ tiktoken == 0.3.3
 pypdf == 3.8.1
 pymupdf == 1.22.2
 pillow
-fitz
