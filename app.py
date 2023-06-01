@@ -6,7 +6,7 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
-from pymupdf import fitz
+import fitz
 from PIL import Image
 
 # Global variables
