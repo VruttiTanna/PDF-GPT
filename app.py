@@ -59,39 +59,18 @@ def process_file(file):
     return chain
 
 # Function to render a specific page of a PDF file as an image
-def render_file(btn):
-    global N
+def render_file(file):
     try:
-        # Check if the file is empty
-        if btn.size == 0:
-            raise fitz.EmptyFileError('Uploaded PDF file is empty')
-
-        # Create a temporary file to store the uploaded PDF
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            temp_path = temp_file.name
-            temp_file.write(btn.read())
-
-        doc = fitz.open(temp_path)
-        page = doc[N]
+        doc = fitz.open(stream=file, filetype="pdf")
+        page = doc[0]  # Render the first page of the PDF
         # Render the page as a PNG image with a resolution of 300 DPI
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
-
-        # Delete the temporary file
-        temp_file.close()
-        del doc
-        del pix
-        del page
-        del btn
-        st.info("TempFile removed")
-        st.info("doc removed")
-
         return image
-    except FileNotFoundError:
-        st.error('PDF file not found. Please make sure the file exists and check the file path.')
-    #except fitz.EmptyFileError:
-     #   st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
-
+    except fitz.errors.PDFError as e:
+        st.error(f"Error: {str(e)}")
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
 
 # Rest of the code...
 
