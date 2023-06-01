@@ -67,7 +67,7 @@ if submit_btn:
     if not uploaded_file:
         st.error('Upload a PDF file')
     else:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_path = temp_file.name
             temp_file.write(uploaded_file.read())
 
@@ -91,11 +91,11 @@ if submit_btn:
         else:
             st.error('The uploaded PDF does not contain any searchable content.')
 
-        os.remove(temp_path)
-        
         # Display PDF as image
         pdf_file = open(temp_path, 'rb')
         pdf_reader = PyPDF2.PdfFileReader(pdf_file)
         first_page = pdf_reader.getPage(0)
         pdf_image = first_page.extractText()  # Extract the image from the first page
         st.image(pdf_image)
+
+        os.remove(temp_path)
