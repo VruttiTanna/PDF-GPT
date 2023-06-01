@@ -61,6 +61,7 @@ with col1:
     txt = st.text_input('Enter text and press enter')
     chat_history = []
     submit_btn = st.button('Submit')
+    uploaded_file = None  # Initialize uploaded_file variable
 
     if submit_btn:
         if not txt:
