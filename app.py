@@ -33,7 +33,12 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file.name)
+    file_path = "temp.pdf"
+
+    with open(file_path, "wb") as f:
+        f.write(file.read())
+
+    loader = PyPDFLoader(file_path)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
@@ -43,7 +48,12 @@ def process_file(file):
     chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
                                                   retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
                                                   return_source_documents=True)
+
+    # Delete the temporary file
+    os.remove(file_path)
+
     return chain
+
 
 
 
