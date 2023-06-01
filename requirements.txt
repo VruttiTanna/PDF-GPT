@@ -9,3 +9,4 @@ pymupdf == 1.22.2
 pillow
 PyPDF2
 pdf2image
+wand
