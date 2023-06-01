@@ -7,6 +7,7 @@ from langchain.document_loaders import PyPDFLoader
 import os
 import fitz
 from PIL import Image
+from io import BytesIO
 
 # Global variables
 COUNT, N = 0, 0
@@ -65,7 +66,7 @@ def generate_response(history, query, btn):
 def render_file(file):
     global N
     try:
-        doc = fitz.open(stream=file.getvalue(), filetype="pdf")
+        doc = fitz.open(stream=file, filetype="pdf")
         page = doc[N]
         # Render the page as a PNG image with a resolution of 300 DPI
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
