@@ -31,7 +31,7 @@ def process_file(file):
         st.error('Upload your OpenAI API key')
 
     doc = fitz.open(stream=file.read(), filetype="pdf")
-    documents = [doc]
+    documents = [page.get_text() for page in doc]
 
     embeddings = OpenAIEmbeddings()
     pdfsearch = Chroma.from_documents(documents, embeddings)
@@ -40,6 +40,7 @@ def process_file(file):
                                                   retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
                                                   return_source_documents=True)
     return chain
+
 
 # Function to generate a response based on the chat history and query
 def generate_response(history, query, btn):
