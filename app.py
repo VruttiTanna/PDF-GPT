@@ -58,7 +58,35 @@ def process_file(file):
 
     return chain
 
+# Function to render a specific page of a PDF file as an image
+def render_file(btn):
+    global N
+    try:
+        # Check if the file is empty
+        if btn.size == 0:
+            raise fitz.EmptyFileError('Uploaded PDF file is empty')
 
+        # Create a temporary file to store the uploaded PDF
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(btn.read())
+
+        doc = fitz.open(temp_path)
+        page = doc[N]
+        # Render the page as a PNG image with a resolution of 300 DPI
+        pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
+        image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
+
+        # Delete the temporary file
+        os.remove(temp_path)
+
+        return image
+    except FileNotFoundError:
+        st.error('PDF file not found. Please make sure the file exists and check the file path.')
+    except fitz.EmptyFileError:
+        st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+
+# Rest of the code...
 
 
 
@@ -80,24 +108,6 @@ def generate_response(history, query, btn):
         history[-1] = (history[-1][0], history[-1][1] + char)
         yield history, ''
 
-# Function to render a specific page of a PDF file as an image
-def render_file(btn):
-    global N
-    try:
-        # Check if the file is empty
-        if btn.size == 0:
-            raise fitz.EmptyFileError('Uploaded PDF file is empty')
-
-        doc = fitz.open(stream=btn.read(), filetype="pdf")
-        page = doc[N]
-        # Render the page as a PNG image with a resolution of 300 DPI
-        pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
-        image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
-        return image
-    except FileNotFoundError:
-        st.error('PDF file not found. Please make sure the file exists and check the file path.')
-    except fitz.EmptyFileError:
-        st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
 
 
 # Streamlit application setup
