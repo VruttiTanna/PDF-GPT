@@ -8,6 +8,8 @@ import os
 import fitz
 from PIL import Image
 from io import BytesIO
+from langchain.retrievers import TextRetriever
+
 
 # Global variables
 COUNT, N = 0, 0
@@ -26,7 +28,6 @@ def add_text(history, text):
     return history
 
 # Function to process the PDF file and create a conversation chain
-from langchain.retrievers import TextRetriever
 
 def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
