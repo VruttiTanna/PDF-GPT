@@ -1,8 +1,3 @@
-I apologize for the confusion. Upon reviewing the code again, I noticed that the `file_uploader` from Streamlit returns a `BytesIO` object instead of a file name. Therefore, we need to modify the code to handle the `BytesIO` object appropriately.
-
-Here's an updated version of the code that should work:
-
-```python
 import streamlit as st
 import fitz
 from PIL import Image
