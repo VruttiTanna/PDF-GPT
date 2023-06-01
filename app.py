@@ -7,6 +7,10 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
+from pdf2image import convert_from_path
+import io
+from PIL import Image
+
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
@@ -102,9 +106,16 @@ with col3:
     if 'temp_path' in st.session_state:
         st.subheader('Uploaded PDF Preview')
 
-        # Replace this logic with your PDF preview extraction code
-        pdf_reader = PdfReader(st.session_state.temp_path)
-        first_page = pdf_reader.pages[0]
-        preview_image = first_page.extract_text()
+        # Convert first page of PDF to image
+        pdf_path = st.session_state.temp_path
+        images = convert_from_path(pdf_path, first_page=0, last_page=1)
+        if images:
+            # Resize the image to fit the Streamlit layout
+            max_width = 500
+            image = images[0]
+            image.thumbnail((max_width, max_width), Image.ANTIALIAS)
 
-        st.image(preview_image, caption='Uploaded PDF Preview', use_column_width=True)
+            # Display the image
+            st.image(image, caption='Uploaded PDF Preview', use_column_width=True)
+        else:
+            st.error('Failed to extract the preview image from the uploaded PDF.')
