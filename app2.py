@@ -1,4 +1,5 @@
 import streamlit as st
+from pdf2image import convert_from_bytes
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
@@ -6,9 +7,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
-from pdf2image import convert_from_bytes
-import io
-from PIL import Image
 
 
 # Function to set the OpenAI API key
@@ -25,11 +23,11 @@ def add_text(history, text):
 
 
 # Function to process the PDF file and create a conversation chain
-def process_file(file_bytes):
+def process_file(file_path):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file_bytes)
+    loader = PyPDFLoader(file_path)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
@@ -46,76 +44,58 @@ def process_file(file_bytes):
 
 
 # Streamlit application setup
-st.set_page_config(page_title='Chatbot with PDF Support', layout='wide')
 st.title('Chatbot with PDF Support')
 
-# Sidebar - OpenAI API Key
+# OpenAI API Key
 st.sidebar.header('OpenAI API Key')
-api_key = st.sidebar.text_input('Enter your OpenAI API key')
+api_key = st.sidebar.text_input('Upload your OpenAI API key')
 if api_key:
     set_apikey(api_key)
 
-# Main Section - Chatbot and PDF Upload
-col1, col2, col3 = st.beta_columns([2, 1, 1])
+# Chatbot and Image Display
+st.subheader('Chatbot')
+chat_history_output = st.empty()
+txt = st.text_input('Enter text and press enter')
+chat_history = []
 
-# Chatbot Section
-with col1:
-    st.subheader('Chatbot')
-    txt = st.text_input('Enter text and press Enter')
-    chat_history = []
+# Upload PDF
+st.subheader('Upload PDF')
+uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
+show_img = st.empty()
 
-    if st.button('Submit'):
-        if not txt:
-            st.error('Enter text')
-        else:
-            add_text(chat_history, txt)
-            if 'temp_bytes' in st.session_state:
-                chain = process_file(st.session_state.temp_bytes)
-                context = " ".join([item[0] for item in chat_history])
-                prompt_template = "The document mentions {}. What would you like to know about it?"
+submit_btn = st.button('Submit')
 
-                if chain.retriever.has_data():
-                    result = chain({
-                        "question": txt,
-                        'chat_history': chat_history,
-                        'context': context,
-                        'prompt_template': prompt_template
-                    }, return_only_outputs=True)
-
-                    chat_history.append((txt, result["answer"]))
-
-                    # Display chat history
-                    for idx, (question, answer) in enumerate(chat_history):
-                        st.text_area(f'{idx + 1}. User:', question, height=100)
-                        st.text_area(f'{idx + 1}. Chatbot:', answer, height=100)
-                else:
-                    st.error('The uploaded PDF does not contain any searchable content.')
-
-# PDF Upload Section
-with col2:
-    st.subheader('Upload PDF')
-    uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
-
-    if uploaded_file:
-        file_bytes = uploaded_file.read()
-        st.session_state.temp_bytes = file_bytes
-
-        st.success('PDF uploaded successfully!')
-
-# PDF Preview Section
-with col3:
-    st.subheader('PDF Preview')
-    if 'temp_bytes' in st.session_state:
-        images = convert_from_bytes(st.session_state.temp_bytes, first_page=0, last_page=1)
-
-        if images:
-            image = images[0]
-            image_stream = io.BytesIO()
-            image.save(image_stream, format='PNG')
-
-            st.image(image_stream, caption='PDF Preview', use_column_width=True)
-        else:
-            st.warning('Unable to preview the PDF.')
+if submit_btn:
+    if not uploaded_file:
+        st.error('Upload a PDF file')
     else:
-        st.info('Upload a PDF to see the preview.')
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(uploaded_file.read())
 
+        add_text(chat_history, txt)
+        chain = process_file(temp_path)
+
+        # Set context and prompt template
+        context = " ".join([item[0] for item in chat_history])
+        prompt_template = "The document mentions {}. What would you like to know about it?"
+
+        if chain.retriever.vectorstore:
+            result = chain({
+                "question": txt,
+                'chat_history': chat_history,
+                'context': context,
+                'prompt_template': prompt_template
+            }, return_only_outputs=True)
+
+            chat_history.append((txt, result["answer"]))
+            chat_history_output.write(chat_history[-1][1])
+
+            # Convert PDF to images
+            images = convert_from_bytes(uploaded_file.read(), first_page=0, last_page=1)
+            for image in images:
+                show_img.image(image, use_column_width=True)
+        else:
+            st.error('The uploaded PDF does not contain any searchable content.')
+
+        os.remove(temp_path)
