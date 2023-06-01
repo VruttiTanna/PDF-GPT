@@ -8,7 +8,7 @@ import os
 import fitz
 from PIL import Image
 from io import BytesIO
-from langchain.vectorstores import Chroma
+from langchain.document_loaders import PyPDFLoader
 
 
 # Global variables
@@ -33,8 +33,8 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    doc = fitz.open(stream=file.read(), filetype="pdf")
-    documents = [page.get_text() for page in doc]
+    loader = PyPDFLoader(file.name)
+    documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
 
