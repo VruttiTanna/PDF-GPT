@@ -89,8 +89,8 @@ def render_file(btn):
         return image
     except FileNotFoundError:
         st.error('PDF file not found. Please make sure the file exists and check the file path.')
-    except fitz.EmptyFileError:
-        st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+    #except fitz.EmptyFileError:
+     #   st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
 
 
 # Rest of the code...
