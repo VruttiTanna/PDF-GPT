@@ -73,34 +73,47 @@ with col1:
     st.subheader('Upload PDF')
     uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
 
-    if uploaded_file is not None:
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_path = temp_file.name
-            temp_file.write(uploaded_file.read())
+# Process PDF and Chatbot Interaction
+if uploaded_file is not None and submit_btn:
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_path = temp_file.name
+        temp_file.write(uploaded_file.read())
 
-        chain = process_file(temp_path)
+    chain = process_file(temp_path)
 
-        # Set context and prompt template
-        context = " ".join([item[0] for item in chat_history])
-        prompt_template = "The document mentions {}. What would you like to know about it?"
+    # Set context and prompt template
+    context = " ".join([item[0] for item in chat_history])
+    prompt_template = "The document mentions {}. What would you like to know about it?"
 
-        if chain.retriever.vectorstore:
-            result = chain({
-                "question": txt,
-                'chat_history': chat_history,
-                'context': context,
-                'prompt_template': prompt_template
-            }, return_only_outputs=True)
+    if chain.retriever.vectorstore and len(chat_history) > 0:
+        result = chain({
+            "question": txt,
+            'chat_history': chat_history,
+            'context': context,
+            'prompt_template': prompt_template
+        }, return_only_outputs=True)
 
-            chat_history.append((txt, result["answer"]))
-            chat_history_output.write(chat_history[-1][1])
-        else:
-            st.error('The uploaded PDF does not contain any searchable content.')
+        chat_history.append((txt, result["answer"]))
+        chat_history_output.write(chat_history[-1][1])
+    else:
+        st.error('The uploaded PDF does not contain any searchable content.')
 
-        os.remove(temp_path)
+    os.remove(temp_path)
 
 # Image Display Section
 with col2:
     if uploaded_file is not None:
         st.subheader('Uploaded PDF Preview')
-        st.image(uploaded_file, caption='Uploaded PDF', use_column_width=True)
+
+        # Convert first page of PDF to image
+        images = convert_from_path(uploaded_file, first_page=0, last_page=1)
+        if images:
+            # Resize the image to fit the Streamlit layout
+            max_width = 500
+            image = images[0]
+            image.thumbnail((max_width, max_width), Image.ANTIALIAS)
+
+            # Display the image
+            st.image(image, caption='Uploaded PDF Preview', use_column_width=True)
+        else:
+            st.error('Failed to extract the preview image from the uploaded PDF.')
