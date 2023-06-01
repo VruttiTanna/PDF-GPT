@@ -30,7 +30,7 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(BytesIO(file.read()))
+    loader = PyPDFLoader(file.name)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
@@ -76,6 +76,7 @@ def render_file(file):
         st.error('PDF file not found. Please make sure the file exists and check the file path.')
 
 # Streamlit application setup
+st.set_page_config(layout="wide")
 st.title('Chatbot with PDF Support')
 
 # OpenAI API Key
@@ -85,22 +86,25 @@ if api_key:
     set_apikey(api_key)
 
 # Chatbot and Image Display
-st.subheader('Chatbot')
-chat_history_output = st.empty()
-txt = st.text_input('Enter text and press enter')
-chat_history = []
+col1, col2 = st.beta_columns(2)
+with col1:
+    st.subheader('Chatbot')
+    chat_history_output = st.empty()
+    txt = st.text_input('Enter text and press enter')
+    chat_history = []
 
-st.subheader('Upload PDF')
-btn = st.file_uploader('Upload a PDF', type=".pdf")
-show_img = st.empty()
+with col2:
+    st.subheader('Upload PDF')
+    btn = st.file_uploader('Upload a PDF', type=".pdf")
+    show_img = st.empty()
 
-submit_btn = st.button('Submit')
+submit_btn = st
+
+.button('Submit')
 
 if submit_btn:
     add_text(chat_history, txt)
-    response_generator = generate_response(chat_history, txt
-
-, btn)
+    response_generator = generate_response(chat_history, txt, btn)
     for history, response in response_generator:
         chat_history_output.text('\n'.join([f'{h[0]}: {h[1]}' for h in history]))
         chat_history_output.text(response)
