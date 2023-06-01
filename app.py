@@ -13,6 +13,14 @@ def set_apikey(api_key):
     os.environ['OPENAI_API_KEY'] = api_key
 
 
+# Function to add text to the chat history
+def add_text(history, text):
+    if not text:
+        st.error('Enter text')
+    history.append((text, ''))
+    return history
+
+
 # Function to process the PDF file and create a conversation chain
 def process_file(file_path):
     if 'OPENAI_API_KEY' not in os.environ:
