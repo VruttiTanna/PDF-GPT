@@ -61,7 +61,6 @@ with col1:
     txt = st.text_input('Enter text and press enter')
     chat_history = []
     submit_btn = st.button('Submit')
-    uploaded_file = None  # Initialize uploaded_file variable
 
     if submit_btn:
         if not txt:
@@ -69,38 +68,39 @@ with col1:
         else:
             add_text(chat_history, txt)
 
-            # PDF Upload Section
-            st.subheader('Upload PDF')
-            uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
+# PDF Upload Section
+with col1:
+    st.subheader('Upload PDF')
+    uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
 
-            if uploaded_file:
-                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                    temp_path = temp_file.name
-                    temp_file.write(uploaded_file.read())
+    if uploaded_file is not None:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_path = temp_file.name
+            temp_file.write(uploaded_file.read())
 
-                chain = process_file(temp_path)
+        chain = process_file(temp_path)
 
-                # Set context and prompt template
-                context = " ".join([item[0] for item in chat_history])
-                prompt_template = "The document mentions {}. What would you like to know about it?"
+        # Set context and prompt template
+        context = " ".join([item[0] for item in chat_history])
+        prompt_template = "The document mentions {}. What would you like to know about it?"
 
-                if chain.retriever.vectorstore:
-                    result = chain({
-                        "question": txt,
-                        'chat_history': chat_history,
-                        'context': context,
-                        'prompt_template': prompt_template
-                    }, return_only_outputs=True)
+        if chain.retriever.vectorstore:
+            result = chain({
+                "question": txt,
+                'chat_history': chat_history,
+                'context': context,
+                'prompt_template': prompt_template
+            }, return_only_outputs=True)
 
-                    chat_history.append((txt, result["answer"]))
-                    chat_history_output.write(chat_history[-1][1])
-                else:
-                    st.error('The uploaded PDF does not contain any searchable content.')
+            chat_history.append((txt, result["answer"]))
+            chat_history_output.write(chat_history[-1][1])
+        else:
+            st.error('The uploaded PDF does not contain any searchable content.')
 
-                os.remove(temp_path)
+        os.remove(temp_path)
 
 # Image Display Section
 with col2:
-    if uploaded_file:
+    if uploaded_file is not None:
         st.subheader('Uploaded PDF Preview')
         st.image(uploaded_file, caption='Uploaded PDF', use_column_width=True)
