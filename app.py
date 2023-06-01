@@ -7,14 +7,13 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
-from pdf2image import convert_from_path
-import io
-from PIL import Image
+from wand.image import Image
 
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
     os.environ['OPENAI_API_KEY'] = api_key
+
 
 # Function to add text to the chat history
 def add_text(history, text):
@@ -22,6 +21,7 @@ def add_text(history, text):
         st.error('Enter text')
     history.append((text, ''))
     return history
+
 
 # Function to process the PDF file and create a conversation chain
 def process_file(file_path):
@@ -42,6 +42,7 @@ def process_file(file_path):
     )
 
     return chain
+
 
 # Streamlit application setup
 st.set_page_config(page_title='Chatbot with PDF Support', layout='wide')
@@ -106,16 +107,16 @@ with col3:
     if 'temp_path' in st.session_state:
         st.subheader('Uploaded PDF Preview')
 
-        # Convert first page of PDF to image
         pdf_path = st.session_state.temp_path
-        images = convert_from_path(pdf_path, first_page=0, last_page=1)
-        if images:
-            # Resize the image to fit the Streamlit layout
-            max_width = 500
-            image = images[0]
-            image.thumbnail((max_width, max_width), Image.ANTIALIAS)
+        pdf = PdfReader(pdf_path)
+        pdf_bytes = open(pdf_path, "rb").read()
 
-            # Display the image
-            st.image(image, caption='Uploaded PDF Preview', use_column_width=True)
-        else:
-            st.error('Failed to extract the preview image from the uploaded PDF.')
+        # Convert first page of PDF to image
+        with Image(blob=pdf_bytes) as img:
+            img.format = "png"
+            img.compression_quality = 99
+            img.background_color = "white"
+            img.resize(500, 500)
+            img_data = img.make_blob()
+
+        st.image(img_data, caption='Uploaded PDF Preview', use_column_width=True)
