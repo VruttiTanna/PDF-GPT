@@ -86,7 +86,7 @@ def render_file(btn):
     try:
         # Check if the file is empty
         if btn.size == 0:
-            raise st.error('Uploaded PDF file is empty')
+            raise fitz.EmptyFileError('Uploaded PDF file is empty')
 
         doc = fitz.open(stream=btn.read(), filetype="pdf")
         page = doc[N]
@@ -95,9 +95,9 @@ def render_file(btn):
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
     except FileNotFoundError:
-        raise st.error('PDF file not found. Please make sure the file exists and check the file path.')
+        st.error('PDF file not found. Please make sure the file exists and check the file path.')
     except fitz.EmptyFileError:
-        raise st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+        st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
 
 
 # Streamlit application setup
