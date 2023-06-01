@@ -6,13 +6,13 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
+import fitz
 from PIL import Image
-import tempfile
 
 # Global variables
 COUNT, N = 0, 0
 chat_history = []
-chain = ''
+chain = None
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
@@ -30,7 +30,7 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file)
+    loader = PyPDFLoader(file.name)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
@@ -42,13 +42,13 @@ def process_file(file):
     return chain
 
 # Function to generate a response based on the chat history and query
-def generate_response(history, query, file):
+def generate_response(history, query, btn):
     global COUNT, N, chat_history, chain
 
-    if not file:
+    if not btn:
         st.error('Upload a PDF')
     if COUNT == 0:
-        chain = process_file(file)
+        chain = process_file(btn)
         COUNT += 1
 
     result = chain({"question": query, 'chat_history': chat_history}, return_only_outputs=True)
@@ -60,13 +60,14 @@ def generate_response(history, query, file):
         yield history, ''
 
 # Function to render a specific page of a PDF file as an image
-def render_file(file):
+def render_file(btn):
     global N
     try:
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(file.read())
-            tmp_file.seek(0)
-            image = Image.open(tmp_file.name)
+        with fitz.open(btn.name) as doc:
+            page = doc[N]
+            # Render the page as a PNG image with a resolution of 300 DPI
+            pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
+            image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
     except FileNotFoundError:
         raise st.Error('PDF file not found. Please make sure the file exists and check the file path.')
@@ -87,13 +88,16 @@ txt = st.text_input('Enter text and press enter')
 chat_history = []
 
 st.subheader('Upload PDF')
-uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
+btn = st.file_uploader('Upload a PDF', type=".pdf")
 show_img = st.empty()
 
 submit_btn = st.button('Submit')
 
 if submit_btn:
     add_text(chat_history, txt)
-    for _, _ in generate_response(chat_history, txt, uploaded_file):
+    for _, _ in generate_response(chat_history, txt, btn):
         pass
-    render_file(uploaded_file)
+    image = render_file(btn)
+    if image:
+        show_img.image(image)
+
