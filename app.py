@@ -34,12 +34,12 @@ def process_file(file):
     documents = [page.get_text() for page in doc]
 
     embeddings = OpenAIEmbeddings()
-    pdfsearch = Chroma.from_documents(documents, embeddings)
 
     chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
-                                                  retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
+                                                  retriever=documents,
                                                   return_source_documents=True)
     return chain
+
 
 
 # Function to generate a response based on the chat history and query
