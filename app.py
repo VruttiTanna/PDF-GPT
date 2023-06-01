@@ -1,15 +1,13 @@
 import streamlit as st
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.chat_models import ChatOpenAI
 import os
 import fitz
 from PIL import Image
-from io import BytesIO
 from langchain.document_loaders import PyPDFLoader
-
+import tempfile
 
 # Global variables
 COUNT, N = 0, 0
@@ -28,33 +26,35 @@ def add_text(history, text):
     return history
 
 # Function to process the PDF file and create a conversation chain
-
 def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    file_path = "temp.pdf"
-
-    with open(file_path, "wb") as f:
-        f.write(file.read())
+    # Create a temporary file to store the uploaded PDF
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_path = temp_file.name
+        temp_file.write(file.read())
 
     # Check if the file is empty
-    if os.path.getsize(file_path) == 0:
+    if os.path.getsize(temp_path) == 0:
+        os.remove(temp_path)
         raise st.error('Uploaded PDF file is empty')
 
-    loader = PyPDFLoader(file_path)
+    loader = PyPDFLoader(temp_path)
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
 
     pdfsearch = Chroma.from_documents(documents, embeddings)
 
-    chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
-                                                  retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
-                                                  return_source_documents=True)
+    chain = ConversationalRetrievalChain.from_llm(
+        ChatOpenAI(temperature=0.3),
+        retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
+        return_source_documents=True
+    )
 
     # Delete the temporary file
-    os.remove(file_path)
+    os.remove(temp_path)
 
     return chain
 
