@@ -8,7 +8,7 @@ import os
 import fitz
 from PIL import Image
 from io import BytesIO
-from langchain.retrievers import TextRetriever
+from langchain.vectorstores import Chroma
 
 
 # Global variables
@@ -38,13 +38,12 @@ def process_file(file):
 
     embeddings = OpenAIEmbeddings()
 
-    retriever = TextRetriever(documents, embeddings)
+    pdfsearch = Chroma.from_documents(documents, embeddings)
 
     chain = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0.3),
-                                                  retriever=retriever,
+                                                  retriever=pdfsearch.as_retriever(search_kwargs={"k": 1}),
                                                   return_source_documents=True)
     return chain
-
 
 
 
