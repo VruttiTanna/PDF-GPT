@@ -1,4 +1,5 @@
 import streamlit as st
+from pdf2image import convert_from_path
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
@@ -6,6 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
+from PIL import Image
 
 
 # Function to set the OpenAI API key
