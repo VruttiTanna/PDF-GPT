@@ -95,9 +95,10 @@ def render_file(btn):
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
     except FileNotFoundError:
-        raise st.Error('PDF file not found. Please make sure the file exists and check the file path.')
+        raise st.error('PDF file not found. Please make sure the file exists and check the file path.')
     except fitz.EmptyFileError:
-        raise st.Error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+        raise st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+
 
 # Streamlit application setup
 st.title('Chatbot with PDF Support')
