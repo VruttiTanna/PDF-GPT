@@ -74,7 +74,7 @@ if submit_btn:
         add_text(chat_history, txt)
         chain = process_file(temp_path)
 
-        if chain.documents:
+        if chain.retriever.vectorstore.data:
             result = chain({"question": txt, 'chat_history': chat_history}, return_only_outputs=True)
             chat_history.append((txt, result["answer"]))
             chat_history_output.write(chat_history[-1][1])
