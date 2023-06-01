@@ -106,9 +106,7 @@ if uploaded_file is not None and submit_btn:
 with col2:
     if uploaded_file is not None:
         st.subheader('Uploaded PDF Preview')
-
-        # Convert first page of PDF to image
-        images = convert_from_path(uploaded_file, first_page=0, last_page=1)
+        images = convert_from_path(uploaded_file.name, first_page=0, last_page=1)
         if images:
             # Resize the image to fit the Streamlit layout
             max_width = 500
