@@ -63,14 +63,15 @@ def generate_response(history, query, btn):
 def render_file(file):
     global N
     try:
-        doc = fitz.open(file.name)
+        doc = fitz.open(file)
         page = doc[N]
         # Render the page as a PNG image with a resolution of 300 DPI
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
     except FileNotFoundError:
-        raise gr.Error('PDF file not found. Please make sure the file exists and check the file path.')
+        st.error('PDF file not found. Please make sure the file exists and check the file path.')
+
 
 # Streamlit application setup
 st.title('Chatbot with PDF Support')
