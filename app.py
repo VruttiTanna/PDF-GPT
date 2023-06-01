@@ -84,8 +84,8 @@ with col1:
 
                 # Display chat history
                 for idx, (question, answer) in enumerate(chat_history):
-                    st.text_area(f'{idx + 1}. User:', question, height=50)
-                    st.text_area(f'{idx + 1}. Chatbot:', answer, height=50)
+                    st.text_area(f'{idx + 1}. User:', question, height=100)
+                    st.text_area(f'{idx + 1}. Chatbot:', answer, height=100)
             else:
                 st.error('The uploaded PDF does not contain any searchable content.')
 
@@ -100,5 +100,9 @@ with col2:
             temp_file.write(uploaded_file.read())
 
         st.success('PDF uploaded successfully!')
+
+        # Display uploaded PDF
+        st.subheader('Uploaded PDF')
+        st.write(uploaded_file)
 
 st.beta_columns([2, 1])  # Add space between sections
