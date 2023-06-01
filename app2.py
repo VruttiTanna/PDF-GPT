@@ -1,5 +1,4 @@
 import streamlit as st
-from pdf2image import convert_from_bytes
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
@@ -58,10 +57,8 @@ chat_history_output = st.empty()
 txt = st.text_input('Enter text and press enter')
 chat_history = []
 
-# Upload PDF
 st.subheader('Upload PDF')
 uploaded_file = st.file_uploader('Upload a PDF', type=".pdf")
-show_img = st.empty()
 
 submit_btn = st.button('Submit')
 
@@ -90,11 +87,6 @@ if submit_btn:
 
             chat_history.append((txt, result["answer"]))
             chat_history_output.write(chat_history[-1][1])
-
-            # Convert PDF to images
-            images = convert_from_bytes(uploaded_file.read(), first_page=0, last_page=1)
-            for image in images:
-                show_img.image(image, use_column_width=True)
         else:
             st.error('The uploaded PDF does not contain any searchable content.')
 
