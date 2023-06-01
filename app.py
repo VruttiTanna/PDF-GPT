@@ -67,8 +67,8 @@ def render_file(file):
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
         return image
-    except fitz.errors.PDFError as e:
-        st.error(f"Error: {str(e)}")
+    except fitz.Error as e:
+        st.error(f"PDF error: {str(e)}")
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
