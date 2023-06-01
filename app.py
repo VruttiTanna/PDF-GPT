@@ -38,6 +38,10 @@ def process_file(file):
     with open(file_path, "wb") as f:
         f.write(file.read())
 
+    # Check if the file is empty
+    if os.path.getsize(file_path) == 0:
+        raise st.error('Uploaded PDF file is empty')
+
     loader = PyPDFLoader(file_path)
     documents = loader.load()
 
@@ -53,6 +57,7 @@ def process_file(file):
     os.remove(file_path)
 
     return chain
+
 
 
 
