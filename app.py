@@ -30,7 +30,7 @@ def process_file(file):
     if 'OPENAI_API_KEY' not in os.environ:
         st.error('Upload your OpenAI API key')
 
-    loader = PyPDFLoader(file)
+    loader = PyPDFLoader(BytesIO(file.read()))
     documents = loader.load()
 
     embeddings = OpenAIEmbeddings()
@@ -66,7 +66,7 @@ def generate_response(history, query, btn):
 def render_file(file):
     global N
     try:
-        doc = fitz.open(stream=file, filetype="pdf")
+        doc = fitz.open(stream=BytesIO(file.read()), filetype="pdf")
         page = doc[N]
         # Render the page as a PNG image with a resolution of 300 DPI
         pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72))
@@ -98,7 +98,9 @@ submit_btn = st.button('Submit')
 
 if submit_btn:
     add_text(chat_history, txt)
-    response_generator = generate_response(chat_history, txt, btn)
+    response_generator = generate_response(chat_history, txt
+
+, btn)
     for history, response in response_generator:
         chat_history_output.text('\n'.join([f'{h[0]}: {h[1]}' for h in history]))
         chat_history_output.text(response)
