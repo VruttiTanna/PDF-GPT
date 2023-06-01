@@ -53,7 +53,7 @@ if api_key:
     set_apikey(api_key)
 
 # Main Section - Chatbot and PDF Upload
-col1, col2, col3 = st.beta_columns([2, 1, 1])
+col1, col2 = st.beta_columns([2, 1])
 
 # Chatbot Section
 with col1:
@@ -84,8 +84,8 @@ with col1:
 
                 # Display chat history
                 for idx, (question, answer) in enumerate(chat_history):
-                    st.text_area(f'{idx + 1}. User:', question, height=100)
-                    st.text_area(f'{idx + 1}. Chatbot:', answer, height=100)
+                    st.text_area(f'{idx + 1}. User:', question, height=50)
+                    st.text_area(f'{idx + 1}. Chatbot:', answer, height=50)
             else:
                 st.error('The uploaded PDF does not contain any searchable content.')
 
@@ -100,13 +100,5 @@ with col2:
             temp_file.write(uploaded_file.read())
 
         st.success('PDF uploaded successfully!')
-        st.subheader('Uploaded PDF Preview')
-        st.write(uploaded_file)
 
-# Clear Chat History Section
-with col3:
-    if st.button('Clear Chat History'):
-        chat_history = []
-
-st.sidebar.info('To use the chatbot, enter your OpenAI API key in the sidebar.')
-
+st.beta_columns([2, 1])  # Add space between sections
