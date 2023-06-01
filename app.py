@@ -67,7 +67,7 @@ def render_file(btn):
             raise fitz.EmptyFileError('Uploaded PDF file is empty')
 
         # Create a temporary file to store the uploaded PDF
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_path = temp_file.name
             temp_file.write(btn.read())
 
@@ -78,13 +78,20 @@ def render_file(btn):
         image = Image.frombytes('RGB', [pix.width, pix.height], pix.samples)
 
         # Delete the temporary file
-        os.remove(temp_path)
+        temp_file.close()
+        del doc
+        del pix
+        del page
+        del btn
+        st.info("TempFile removed")
+        st.info("doc removed")
 
         return image
     except FileNotFoundError:
         st.error('PDF file not found. Please make sure the file exists and check the file path.')
     except fitz.EmptyFileError:
         st.error('The uploaded PDF file is empty or corrupted. Please upload a valid PDF file.')
+
 
 # Rest of the code...
 
