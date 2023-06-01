@@ -7,6 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 from PIL import Image
+import tempfile
 
 # Global variables
 COUNT, N = 0, 0
@@ -62,7 +63,10 @@ def generate_response(history, query, file):
 def render_file(file):
     global N
     try:
-        image = Image.open(file)
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(file.read())
+            tmp_file.seek(0)
+            image = Image.open(tmp_file.name)
         return image
     except FileNotFoundError:
         raise st.Error('PDF file not found. Please make sure the file exists and check the file path.')
