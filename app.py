@@ -106,4 +106,4 @@ if submit_btn:
     for history, response in response_generator:
         chat_history_output.text('\n'.join([f'{h[0]}: {h[1]}' for h in history]))
         chat_history_output.text(response)
-        render_file(btn)
+        show_img.image(render_file(btn), use_column_width=True)
