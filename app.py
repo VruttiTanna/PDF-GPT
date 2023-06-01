@@ -1,6 +1,7 @@
 import streamlit as st
 import fitz
 from PIL import Image
+import os
 
 # Global variables
 COUNT, N = 0, 0
