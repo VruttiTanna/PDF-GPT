@@ -1,5 +1,4 @@
 import streamlit as st
-from PyPDF2 import PdfReader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import ConversationalRetrievalChain
@@ -7,7 +6,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
-from wand.image import Image
 
 
 # Function to set the OpenAI API key
@@ -68,27 +66,28 @@ with col1:
             st.error('Enter text')
         else:
             add_text(chat_history, txt)
-            if 'temp_path' in st.session_state:
-                chain = process_file(st.session_state.temp_path)
-                context = " ".join([item[0] for item in chat_history])
-                prompt_template = "The document mentions {}. What would you like to know about it?"
+            chain = process_file(temp_path)
 
-                if chain.retriever.has_data():
-                    result = chain({
-                        "question": txt,
-                        'chat_history': chat_history,
-                        'context': context,
-                        'prompt_template': prompt_template
-                    }, return_only_outputs=True)
+            # Set context and prompt template
+            context = " ".join([item[0] for item in chat_history])
+            prompt_template = "The document mentions {}. What would you like to know about it?"
 
-                    chat_history.append((txt, result["answer"]))
+            if chain.retriever.has_data():
+                result = chain({
+                    "question": txt,
+                    'chat_history': chat_history,
+                    'context': context,
+                    'prompt_template': prompt_template
+                }, return_only_outputs=True)
 
-                    # Display chat history
-                    for idx, (question, answer) in enumerate(chat_history):
-                        st.text_area(f'{idx + 1}. User:', question, height=100)
-                        st.text_area(f'{idx + 1}. Chatbot:', answer, height=100)
-                else:
-                    st.error('The uploaded PDF does not contain any searchable content.')
+                chat_history.append((txt, result["answer"]))
+
+                # Display chat history
+                for idx, (question, answer) in enumerate(chat_history):
+                    st.text_area(f'{idx + 1}. User:', question, height=100)
+                    st.text_area(f'{idx + 1}. Chatbot:', answer, height=100)
+            else:
+                st.error('The uploaded PDF does not contain any searchable content.')
 
 # PDF Upload Section
 with col2:
@@ -97,26 +96,17 @@ with col2:
 
     if uploaded_file:
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            st.session_state.temp_path = temp_file.name
+            temp_path = temp_file.name
             temp_file.write(uploaded_file.read())
 
         st.success('PDF uploaded successfully!')
-
-# PDF Preview Section
-with col3:
-    if 'temp_path' in st.session_state:
         st.subheader('Uploaded PDF Preview')
+        st.write(uploaded_file)
 
-        pdf_path = st.session_state.temp_path
-        pdf = PdfReader(pdf_path)
-        pdf_bytes = open(pdf_path, "rb").read()
+# Clear Chat History Section
+with col3:
+    if st.button('Clear Chat History'):
+        chat_history = []
 
-        # Convert first page of PDF to image
-        with Image(blob=pdf_bytes) as img:
-            img.format = "png"
-            img.compression_quality = 99
-            img.background_color = "white"
-            img.resize(500, 500)
-            img_data = img.make_blob()
+st.sidebar.info('To use the chatbot, enter your OpenAI API key in the sidebar.')
 
-        st.image(img_data, caption='Uploaded PDF Preview', use_column_width=True)
