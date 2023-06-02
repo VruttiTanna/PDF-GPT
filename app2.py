@@ -6,8 +6,8 @@ from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 import os
 import tempfile
+from pdf2image import convert_from_bytes
 from PyPDF2 import PdfReader
-
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
@@ -67,6 +67,7 @@ if submit_btn:
     if not uploaded_file:
         st.error('Upload a PDF file')
     else:
+        # Save the uploaded file to a temporary path
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_path = temp_file.name
             temp_file.write(uploaded_file.read())
@@ -92,10 +93,11 @@ if submit_btn:
             st.error('The uploaded PDF does not contain any searchable content.')
 
         # Display PDF as image
-        pdf = PdfReader(temp_path)
-        first_page = pdf.pages[0]
-        pdf_image = first_page.extract_text()  # Extract the image from the first page
-        st.image(pdf_image)
+        images = convert_from_bytes(open(temp_path, 'rb').read(), first_page=0, last_page=1)
+        if images:
+            image = images[0]
+            st.image(image, caption='First page of the PDF')
+        else:
+            st.error('Failed to convert the PDF to an image.')
 
         os.remove(temp_path)
-
