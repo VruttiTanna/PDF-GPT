@@ -8,6 +8,8 @@ import os
 import tempfile
 from pdf2image import convert_from_bytes
 from PyPDF2 import PdfReader
+import subprocess
+
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
