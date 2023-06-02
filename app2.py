@@ -13,7 +13,10 @@ from PyPDF2 import PdfReader
 def set_apikey(api_key):
     os.environ['OPENAI_API_KEY'] = api_key
 
-
+def install_poppler_utils():
+    command = ['apt-get', 'install', '-y', 'poppler-utils']
+    subprocess.check_call(command)
+install_poppler_utils()
 # Function to add text to the chat history
 def add_text(history, text):
     if not text:
