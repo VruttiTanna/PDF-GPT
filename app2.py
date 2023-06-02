@@ -26,10 +26,6 @@ def install_poppler_utils():
 # Install poppler-utils
 install_poppler_utils()
 
-
-# Install poppler-utils
-install_poppler_utils()
-
 # Function to add text to the chat history
 def add_text(history, text):
     if not text:
