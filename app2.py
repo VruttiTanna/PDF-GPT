@@ -17,7 +17,15 @@ def set_apikey(api_key):
 
 def install_poppler_utils():
     command = ['apt-get', 'install', '-y', 'poppler-utils']
-    subprocess.check_call(command)
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as e:
+        st.error(f"Error occurred during poppler-utils installation: {e}")
+
+
+# Install poppler-utils
+install_poppler_utils()
+
 
 # Install poppler-utils
 install_poppler_utils()
