@@ -18,7 +18,10 @@ def set_apikey(api_key):
 def install_poppler_utils():
     command = ['apt-get', 'install', '-y', 'poppler-utils']
     subprocess.check_call(command)
+
+# Install poppler-utils
 install_poppler_utils()
+
 # Function to add text to the chat history
 def add_text(history, text):
     if not text:
@@ -98,11 +101,18 @@ if submit_btn:
             st.error('The uploaded PDF does not contain any searchable content.')
 
         # Display PDF as image
-        images = convert_from_bytes(open(temp_path, 'rb').read(), first_page=0, last_page=1)
-        if images:
-            image = images[0]
-            st.image(image, caption='First page of the PDF')
-        else:
-            st.error('Failed to convert the PDF to an image.')
+        try:
+            images = convert_from_bytes(open(temp_path, 'rb').read(), first_page=0, last_page=1)
+            if images:
+                image = images[0]
+                st.image(image, caption='First page of the PDF')
+            else:
+                st.error('Failed to convert the PDF to an image.')
+        except Exception as e:
+            st.error('Error occurred during PDF to image conversion.')
 
-        os.remove(temp_path)
+        # Remove the temporary PDF file
+        try:
+            os.remove(temp_path)
+        except Exception as e:
+            st.error('Error occurred while removing the temporary PDF file.')
