@@ -16,7 +16,7 @@ def set_apikey(api_key):
     os.environ['OPENAI_API_KEY'] = api_key
 
 def install_poppler_utils():
-    command = ['apt-get', 'install', '-y', 'poppler-utils']
+    command = ['pip', 'install', 'poppler-utils']
     try:
         subprocess.check_call(command)
     except subprocess.CalledProcessError as e:
