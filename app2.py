@@ -1,8 +1,13 @@
 import streamlit as st
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import PyPDFLoader
+import os
 import tempfile
-from pdf2image import convert_from_path
+from pdf2image import convert_from_bytes
 from PyPDF2 import PdfReader
-from PIL import Image
 
 # Function to set the OpenAI API key
 def set_apikey(api_key):
@@ -62,6 +67,7 @@ if submit_btn:
     if not uploaded_file:
         st.error('Upload a PDF file')
     else:
+        # Save the uploaded file to a temporary path
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_path = temp_file.name
             temp_file.write(uploaded_file.read())
@@ -87,7 +93,7 @@ if submit_btn:
             st.error('The uploaded PDF does not contain any searchable content.')
 
         # Display PDF as image
-        images = convert_from_path(temp_path, first_page=0, last_page=1)
+        images = convert_from_bytes(open(temp_path, 'rb').read(), first_page=0, last_page=1)
         if images:
             image = images[0]
             st.image(image, caption='First page of the PDF')
